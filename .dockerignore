@@ -1,0 +1,5 @@
+modelCreator/
+StreamLitScripts/
+__pycache__/
+*.venv
+.git
