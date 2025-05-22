@@ -1,9 +1,10 @@
 import pandas as pd
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+import keras
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
 import matplotlib.pyplot as plt
 import pickle
 
@@ -14,8 +15,8 @@ tf.autograph.set_verbosity(0)
 
 df_train = pd.read_csv("train.csv")
 
-train_texts = (df_train.iloc[:100, 1].astype(str) + " " + df_train.iloc[:100, 2].astype(str)).values
-train_labels = (df_train.iloc[:100, :1].values - 1) # 0 или 1
+train_texts = (df_train.iloc[:10000, 1].astype(str) + " " + df_train.iloc[:10000, 2].astype(str)).values
+train_labels = (df_train.iloc[:10000, :1].values - 1) # 0 или 1
 # 0 - neg
 # 1 - pos
 
@@ -30,20 +31,18 @@ padded = pad_sequences(sequences, padding='post', maxlen=100)
 # pad_sequences - Делает все входы одинаковой длины
 
 model = Sequential([
-        tf.keras.layers.Embedding(input_dim=10000, output_dim=16, input_length=100),
+        keras.layers.Embedding(input_dim=10000, output_dim=16, input_length=100),
         # Embedding - Обучаемое представление слов
-        tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32)),
+        keras.layers.Bidirectional(keras.layers.LSTM(32)),
         # LSTM / Bidirectional - Обрабатывает последовательность
         Dense(128, activation = 'relu', name='L1'),
-        Dropout(0.5),
         Dense(64, activation='relu', name='L2'),
-        Dropout(0.5),
         Dense(1, activation = 'sigmoid', name='L3')
 ])
 
 model.compile(
-    loss = tf.keras.losses.BinaryCrossentropy(),
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001),
+    loss = keras.losses.BinaryCrossentropy(),
+    optimizer = keras.optimizers.Adam(learning_rate=0.001),
     metrics=['accuracy']
 )
 
@@ -52,8 +51,8 @@ model.fit(padded, train_labels, epochs=10, validation_split=0.2)
 
 df_test = pd.read_csv("test.csv")
 
-test_texts = (df_test.iloc[:100, 1].astype(str) + " " + df_test.iloc[:100, 2].astype(str)).values
-test_labels = (df_test.iloc[:100, :1].values - 1) # 0 или 1
+test_texts = (df_test.iloc[:10000, 1].astype(str) + " " + df_test.iloc[:10000, 2].astype(str)).values
+test_labels = (df_test.iloc[:10000, :1].values - 1) # 0 или 1
 
 
 sequences_test = tokenizer.texts_to_sequences(test_texts)
@@ -86,6 +85,6 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-model.save("sentiment_model.h5")
+model.save("sentiment_model.keras")
 with open("../tokenizer.pkl", "wb") as f:
     pickle.dump(tokenizer, f)

@@ -8,7 +8,7 @@ from keras.preprocessing.sequence import pad_sequences
 app = FastAPI(title="Sentiment Prediction API")
 
 try:
-    model = keras.models.load_model("keras_model.keras")
+    model = keras.models.load_model("sentiment_model.keras")
 except Exception as e:
     raise RuntimeError(f"Failed to load model: {e}")
 
